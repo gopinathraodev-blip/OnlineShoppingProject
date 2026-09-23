@@ -9,36 +9,47 @@ Home | Online Shopping
 {% block content %}
 
 <!-- Hero Section -->
-<section class="py-5 bg-light">
+<section class="hero-section py-5">
     <div class="container">
-        <div class="row align-items-center">
+        <div class="row align-items-center min-vh-75">
 
             <div class="col-lg-6">
+                <span class="badge bg-primary-subtle text-primary mb-3">
+                    Welcome to Online Shopping
+                </span>
+
                 <h1 class="display-4 fw-bold">
-                    Shop Smart. Shop Easy.
+                    Shop Smart.<br>
+                    Shop Easy.
                 </h1>
 
                 <p class="lead text-muted mt-3">
-                    Discover great products at amazing prices.
-                    Everything you need, all in one place.
+                    Discover quality products, great prices,
+                    and a simple shopping experience.
                 </p>
 
                 <div class="mt-4">
-                    <a href="#" class="btn btn-primary btn-lg me-2">
+                    <a
+                        href="/products/"
+                        class="btn btn-primary btn-lg me-2"
+                    >
                         Shop Now
                     </a>
 
-                    <a href="#" class="btn btn-outline-dark btn-lg">
-                        Explore Categories
+                    <a
+                        href="#categories"
+                        class="btn btn-outline-dark btn-lg"
+                    >
+                        Categories
                     </a>
                 </div>
             </div>
 
-            <div class="col-lg-6 text-center mt-4 mt-lg-0">
+            <div class="col-lg-6 text-center mt-5 mt-lg-0">
                 <img
                     src="{% static 'images/hero-banner.jpg' %}"
                     alt="Online Shopping"
-                    class="img-fluid rounded shadow"
+                    class="img-fluid hero-image"
                 >
             </div>
 
@@ -47,81 +58,75 @@ Home | Online Shopping
 </section>
 
 
-<!-- Categories Section -->
-<section class="py-5">
+<!-- Categories -->
+<section
+    id="categories"
+    class="py-5"
+>
     <div class="container">
 
         <div class="text-center mb-5">
-            <h2 class="fw-bold">Shop by Category</h2>
+            <h2 class="fw-bold">
+                Shop by Category
+            </h2>
 
             <p class="text-muted">
-                Explore our popular categories
+                Explore our product categories
             </p>
         </div>
 
         <div class="row g-4">
 
-            <div class="col-md-4">
-                <div class="card h-100 shadow-sm">
-                    <img
-                        src="{% static 'images/electronics.jpg' %}"
-                        class="card-img-top"
-                        alt="Electronics"
-                    >
+            {% for category in categories %}
+
+            <div class="col-sm-6 col-lg-4">
+
+                <div class="card category-card h-100 shadow-sm">
+
+                    <div class="category-image-wrapper">
+
+                        <img
+                            src="{% static 'images/category-placeholder.jpg' %}"
+                            class="card-img-top category-image"
+                            alt="{{ category.name }}"
+                        >
+
+                    </div>
 
                     <div class="card-body text-center">
-                        <h5 class="card-title">
-                            Electronics
+
+                        <h5 class="card-title fw-bold">
+                            {{ category.name }}
                         </h5>
 
-                        <a href="#" class="btn btn-outline-primary">
+                        {% if category.description %}
+                            <p class="card-text text-muted">
+                                {{ category.description|truncatewords:12 }}
+                            </p>
+                        {% endif %}
+
+                        <a
+                            href="/products/?category={{ category.id }}"
+                            class="btn btn-outline-primary"
+                        >
                             View Products
                         </a>
+
                     </div>
+
+                </div>
+
+            </div>
+
+            {% empty %}
+
+            <div class="col-12">
+                <div class="alert alert-info text-center">
+                    No categories are available yet.
                 </div>
             </div>
 
-
-            <div class="col-md-4">
-                <div class="card h-100 shadow-sm">
-                    <img
-                        src="{% static 'images/fashion.jpg' %}"
-                        class="card-img-top"
-                        alt="Fashion"
-                    >
-
-                    <div class="card-body text-center">
-                        <h5 class="card-title">
-                            Fashion
-                        </h5>
-
-                        <a href="#" class="btn btn-outline-primary">
-                            View Products
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-
-            <div class="col-md-4">
-                <div class="card h-100 shadow-sm">
-                    <img
-                        src="{% static 'images/home-living.jpg' %}"
-                        class="card-img-top"
-                        alt="Home & Living"
-                    >
-
-                    <div class="card-body text-center">
-                        <h5 class="card-title">
-                            Home & Living
-                        </h5>
-
-                        <a href="#" class="btn btn-outline-primary">
-                            View Products
-                        </a>
-                    </div>
-                </div>
-            </div>
+            {% endfor %}
 
         </div>
     </div>
@@ -130,49 +135,162 @@ Home | Online Shopping
 
 <!-- Featured Products -->
 <section class="py-5 bg-light">
+
     <div class="container">
 
         <div class="text-center mb-5">
-            <h2 class="fw-bold">Featured Products</h2>
+            <h2 class="fw-bold">
+                Featured Products
+            </h2>
 
             <p class="text-muted">
-                Check out some of our popular products
+                Browse our latest available products
             </p>
         </div>
 
         <div class="row g-4">
 
-            <div class="col-md-6 col-lg-3">
-                <div class="card h-100 shadow-sm">
-                    <img
-                        src="{% static 'images/product-placeholder.jpg' %}"
-                        class="card-img-top"
-                        alt="Product"
-                    >
+            {% for product in featured_products %}
 
-                    <div class="card-body">
-                        <h5 class="card-title">
-                            Sample Product
+            <div class="col-sm-6 col-lg-3">
+
+                <div class="card product-card h-100 shadow-sm">
+
+                    {% if product.image %}
+
+                        <img
+                            src="{{ product.image.url }}"
+                            class="card-img-top product-image"
+                            alt="{{ product.name }}"
+                        >
+
+                    {% else %}
+
+                        <img
+                            src="{% static 'images/product-placeholder.jpg' %}"
+                            class="card-img-top product-image"
+                            alt="{{ product.name }}"
+                        >
+
+                    {% endif %}
+
+
+                    <div class="card-body d-flex flex-column">
+
+                        <small class="text-muted">
+                            {{ product.category.name }}
+                        </small>
+
+                        <h5 class="card-title mt-1">
+                            {{ product.name }}
                         </h5>
 
                         <p class="card-text text-muted">
-                            Product description
+                            {{ product.description|truncatewords:12 }}
                         </p>
 
-                        <h5 class="text-primary">
-                            ₹999.00
-                        </h5>
+                        <div class="mt-auto">
 
-                        <button class="btn btn-primary w-100 mt-2">
-                            Add to Cart
-                        </button>
+                            <h5 class="text-primary fw-bold">
+                                ₹{{ product.price }}
+                            </h5>
+
+                            <a
+                                href="/products/{{ product.id }}/"
+                                class="btn btn-primary w-100"
+                            >
+                                View Product
+                            </a>
+
+                        </div>
+
                     </div>
+
+                </div>
+
+            </div>
+
+            {% empty %}
+
+            <div class="col-12">
+                <div class="alert alert-info text-center">
+                    No products are available yet.
+                </div>
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- Why Choose Us -->
+<section class="py-5">
+
+    <div class="container">
+
+        <div class="text-center mb-5">
+            <h2 class="fw-bold">
+                Why Shop With Us?
+            </h2>
+        </div>
+
+        <div class="row g-4">
+
+            <div class="col-md-4">
+                <div class="text-center p-4">
+                    <div class="fs-1 mb-3">
+                        🚚
+                    </div>
+                    <h5 class="fw-bold">
+                        Fast Delivery
+                    </h5>
+                    <p class="text-muted">
+                        Get your products delivered quickly
+                        to your doorstep.
+                    </p>
+                </div>
+            </div>
+
+
+            <div class="col-md-4">
+                <div class="text-center p-4">
+                    <div class="fs-1 mb-3">
+                        🔒
+                    </div>
+                    <h5 class="fw-bold">
+                        Secure Shopping
+                    </h5>
+                    <p class="text-muted">
+                        Your account and shopping information
+                        are protected.
+                    </p>
+                </div>
+            </div>
+
+
+            <div class="col-md-4">
+                <div class="text-center p-4">
+                    <div class="fs-1 mb-3">
+                        ⭐
+                    </div>
+                    <h5 class="fw-bold">
+                        Quality Products
+                    </h5>
+                    <p class="text-muted">
+                        Discover products across multiple
+                        categories.
+                    </p>
                 </div>
             </div>
 
         </div>
 
     </div>
+
 </section>
 
 {% endblock %}

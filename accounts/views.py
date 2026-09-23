@@ -2,7 +2,6 @@ from rest_framework import generics, status
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-
 from .models import Customer
 from .serializers import CustomerSerializer, LoginSerializer
 
@@ -37,3 +36,13 @@ class LoginView(generics.GenericAPIView):
             },
             status=status.HTTP_200_OK,
         )
+
+from django.shortcuts import render
+
+
+def login_page(request):
+    return render(request, "accounts/login.html")
+
+
+def register_page(request):
+    return render(request, "accounts/register.html")
