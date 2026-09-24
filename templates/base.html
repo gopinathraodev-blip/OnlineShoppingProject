@@ -50,13 +50,13 @@
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link" href="#">
+                        <a class="nav-link" href="/products/">
                             Products
                         </a>
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link" href="#">
+                        <a class="nav-link" href="/#categories">
                             Categories
                         </a>
                     </li>
@@ -66,25 +66,44 @@
                             class="nav-link"
                             href="/cart/"
                         >
-                        Cart
+                            Cart
                         </a>
                     </li>
 
                     <li class="nav-item">
+                        <a
+                            class="nav-link"
+                            href="/orders/"
+                        >
+                            Orders
+                        </a>
+                    </li>
+
+                    <li class="nav-item" id="loginNavItem">
                         <a
                             class="nav-link"
                             href="/api/accounts/login-page/"
                         >
-                        Login
+                            Login
                         </a>
                     </li>
 
-                    <li class="nav-item">
+                    <li class="nav-item" id="registerNavItem">
                         <a
                             class="nav-link"
                             href="/api/accounts/register-page/"
                         >
-                        Register
+                            Register
+                        </a>
+                    </li>
+
+                    <li class="nav-item d-none" id="logoutNavItem">
+                        <a
+                            class="nav-link"
+                            href="#"
+                            onclick="logoutUser(); return false;"
+                        >
+                            Logout
                         </a>
                     </li>
 

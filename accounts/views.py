@@ -2,6 +2,9 @@ from rest_framework import generics, status
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+from rest_framework.authtoken.models import Token
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from django.shortcuts import render
 from .models import Customer
 from .serializers import CustomerSerializer, LoginSerializer
 
@@ -37,7 +40,19 @@ class LoginView(generics.GenericAPIView):
             status=status.HTTP_200_OK,
         )
 
-from django.shortcuts import render
+
+class LogoutView(generics.GenericAPIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        Token.objects.filter(user=request.user).delete()
+
+        return Response(
+            {
+                "message": "Logout successful."
+            },
+            status=status.HTTP_200_OK
+        )
 
 
 def login_page(request):

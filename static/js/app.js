@@ -778,3 +778,803 @@ document.addEventListener(
 
     }
 );
+
+
+async function loadCheckout() {
+
+    const summary =
+        document.getElementById("checkoutSummary");
+
+    if (!summary) {
+        return;
+    }
+
+    const token =
+        localStorage.getItem("authToken");
+
+    if (!token) {
+
+        window.location.href =
+            "/api/accounts/login-page/";
+
+        return;
+    }
+
+    try {
+
+        const response = await fetch(
+            "/api/cart/",
+            {
+                method: "GET",
+                headers: {
+                    "Authorization":
+                        "Token " + token
+                }
+            }
+        );
+
+        const data =
+            await response.json();
+
+        if (response.status === 401) {
+
+            localStorage.removeItem("authToken");
+            localStorage.removeItem("username");
+
+            window.location.href =
+                "/api/accounts/login-page/";
+
+            return;
+        }
+
+        if (!response.ok) {
+            throw new Error(
+                data.detail ||
+                "Unable to load cart."
+            );
+        }
+
+        if (!data.items || data.items.length === 0) {
+
+            summary.innerHTML = `
+                <div class="text-center">
+                    <p class="text-muted">
+                        Your cart is empty.
+                    </p>
+
+                    <a
+                        href="/products/"
+                        class="btn btn-primary"
+                    >
+                        Continue Shopping
+                    </a>
+                </div>
+            `;
+
+            return;
+        }
+
+        let html = "";
+
+        data.items.forEach(function (item) {
+
+            html += `
+                <div class="d-flex
+                            justify-content-between
+                            mb-3">
+
+                    <div>
+                        <div class="fw-semibold">
+                            ${escapeHtml(
+                                item.product_name
+                            )}
+                        </div>
+
+                        <small class="text-muted">
+                            ${item.quantity} ×
+                            ₹${item.unit_price}
+                        </small>
+                    </div>
+
+                    <strong>
+                        ₹${item.subtotal}
+                    </strong>
+
+                </div>
+            `;
+        });
+
+        html += `
+            <hr>
+
+            <div class="d-flex
+                        justify-content-between">
+
+                <strong>
+                    Total
+                </strong>
+
+                <strong class="text-primary">
+                    ₹${data.total_amount}
+                </strong>
+
+            </div>
+        `;
+
+        summary.innerHTML = html;
+
+    } catch (error) {
+
+        summary.innerHTML = `
+            <div class="alert alert-danger">
+                ${escapeHtml(error.message)}
+            </div>
+        `;
+    }
+}
+
+
+async function submitCheckout(event) {
+
+    event.preventDefault();
+
+    const token =
+        localStorage.getItem("authToken");
+
+    const message =
+        document.getElementById("checkoutMessage");
+
+    if (!token) {
+
+        window.location.href =
+            "/api/accounts/login-page/";
+
+        return;
+    }
+
+
+    const payload = {
+        shipping_address:
+            document.getElementById(
+                "shipping_address"
+            ).value,
+
+        shipping_city:
+            document.getElementById(
+                "shipping_city"
+            ).value,
+
+        shipping_state:
+            document.getElementById(
+                "shipping_state"
+            ).value,
+
+        shipping_postal_code:
+            document.getElementById(
+                "shipping_postal_code"
+            ).value,
+
+        shipping_country:
+            document.getElementById(
+                "shipping_country"
+            ).value
+    };
+
+
+    try {
+
+        const response = await fetch(
+            "/api/orders/checkout/",
+            {
+                method: "POST",
+
+                headers: {
+                    "Content-Type":
+                        "application/json",
+
+                    "Authorization":
+                        "Token " + token
+                },
+
+                body: JSON.stringify(payload)
+            }
+        );
+
+
+        const data =
+            await response.json();
+
+
+        if (response.status === 401) {
+
+            localStorage.removeItem("authToken");
+            localStorage.removeItem("username");
+
+            window.location.href =
+                "/api/accounts/login-page/";
+
+            return;
+        }
+
+
+        if (!response.ok) {
+
+            const errors =
+                Object.values(data).flat();
+
+            message.className =
+                "alert alert-danger";
+
+            message.textContent =
+                errors.length
+                    ? errors.join(" ")
+                    : "Unable to place order.";
+
+            return;
+        }
+
+
+        message.className =
+            "alert alert-success";
+
+        message.textContent =
+            "Order placed successfully!";
+
+
+        setTimeout(function () {
+
+            window.location.href =
+                `/orders/${data.id}/`;
+
+        }, 800);
+
+
+    } catch (error) {
+
+        message.className =
+            "alert alert-danger";
+
+        message.textContent =
+            "Unable to connect to the server.";
+    }
+}
+
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+        loadCheckout();
+
+        const checkoutForm =
+            document.getElementById(
+                "checkoutForm"
+            );
+
+        if (checkoutForm) {
+
+            checkoutForm.addEventListener(
+                "submit",
+                submitCheckout
+            );
+        }
+
+    }
+);
+
+async function loadOrders() {
+
+    const container =
+        document.getElementById("ordersContent");
+
+    if (!container) {
+        return;
+    }
+
+    const token =
+        localStorage.getItem("authToken");
+
+    if (!token) {
+
+        window.location.href =
+            "/api/accounts/login-page/";
+
+        return;
+    }
+
+
+    try {
+
+        const response = await fetch(
+            "/api/orders/",
+            {
+                method: "GET",
+                headers: {
+                    "Authorization":
+                        "Token " + token
+                }
+            }
+        );
+
+
+        const data =
+            await response.json();
+
+
+        if (response.status === 401) {
+
+            localStorage.removeItem("authToken");
+            localStorage.removeItem("username");
+
+            window.location.href =
+                "/api/accounts/login-page/";
+
+            return;
+        }
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.detail ||
+                "Unable to load orders."
+            );
+        }
+
+
+        if (!data.length) {
+
+            container.innerHTML = `
+                <div class="text-center py-5">
+
+                    <h4>
+                        No orders yet
+                    </h4>
+
+                    <p class="text-muted">
+                        Your completed orders will appear here.
+                    </p>
+
+                    <a
+                        href="/products/"
+                        class="btn btn-primary"
+                    >
+                        Start Shopping
+                    </a>
+
+                </div>
+            `;
+
+            return;
+        }
+
+
+        let html = "";
+
+
+        data.forEach(function (order) {
+
+            html += `
+                <div class="card shadow-sm mb-3">
+
+                    <div class="card-body">
+
+                        <div class="row
+                                    align-items-center">
+
+                            <div class="col-md-3">
+
+                                <small class="text-muted">
+                                    Order Number
+                                </small>
+
+                                <div class="fw-bold">
+                                    ${escapeHtml(
+                                        order.order_number
+                                    )}
+                                </div>
+
+                            </div>
+
+
+                            <div class="col-md-2">
+
+                                <small class="text-muted">
+                                    Status
+                                </small>
+
+                                <div>
+                                    <span class="badge bg-primary">
+                                        ${escapeHtml(
+                                            order.status
+                                        )}
+                                    </span>
+                                </div>
+
+                            </div>
+
+
+                            <div class="col-md-2">
+
+                                <small class="text-muted">
+                                    Total
+                                </small>
+
+                                <div class="fw-bold">
+                                    ₹${order.total_amount}
+                                </div>
+
+                            </div>
+
+
+                            <div class="col-md-3">
+
+                                <small class="text-muted">
+                                    Date
+                                </small>
+
+                                <div>
+                                    ${new Date(
+                                        order.created_at
+                                    ).toLocaleString()}
+                                </div>
+
+                            </div>
+
+
+                            <div class="col-md-2 text-md-end">
+
+                                <a
+                                    href="/orders/${order.id}/"
+                                    class="btn btn-outline-primary"
+                                >
+                                    View
+                                </a>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            `;
+        });
+
+
+        container.innerHTML = html;
+
+
+    } catch (error) {
+
+        container.innerHTML = `
+            <div class="alert alert-danger">
+                ${escapeHtml(error.message)}
+            </div>
+        `;
+    }
+}
+
+
+async function loadOrderDetail() {
+
+    const container =
+        document.getElementById(
+            "orderDetailContent"
+        );
+
+    if (!container) {
+        return;
+    }
+
+
+    const token =
+        localStorage.getItem("authToken");
+
+
+    if (!token) {
+
+        window.location.href =
+            "/api/accounts/login-page/";
+
+        return;
+    }
+
+
+    try {
+
+        const response = await fetch(
+            `/api/orders/${orderId}/`,
+            {
+                method: "GET",
+                headers: {
+                    "Authorization":
+                        "Token " + token
+                }
+            }
+        );
+
+
+        const data =
+            await response.json();
+
+
+        if (response.status === 401) {
+
+            localStorage.removeItem("authToken");
+            localStorage.removeItem("username");
+
+            window.location.href =
+                "/api/accounts/login-page/";
+
+            return;
+        }
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.detail ||
+                "Unable to load order."
+            );
+        }
+
+
+        let itemsHTML = "";
+
+
+        data.items.forEach(function (item) {
+
+            itemsHTML += `
+                <tr>
+
+                    <td>
+                        ${escapeHtml(
+                            item.product_name
+                        )}
+                    </td>
+
+                    <td>
+                        ${item.quantity}
+                    </td>
+
+                    <td>
+                        ₹${item.unit_price}
+                    </td>
+
+                    <td>
+                        ₹${item.subtotal}
+                    </td>
+
+                </tr>
+            `;
+        });
+
+
+        container.innerHTML = `
+
+            <div class="card shadow-sm mb-4">
+
+                <div class="card-body">
+
+                    <div class="row">
+
+                        <div class="col-md-6">
+
+                            <h5 class="fw-bold">
+                                ${escapeHtml(
+                                    data.order_number
+                                )}
+                            </h5>
+
+                            <p class="mb-1">
+                                Status:
+                                <span class="badge bg-primary">
+                                    ${escapeHtml(
+                                        data.status
+                                    )}
+                                </span>
+                            </p>
+
+                            <p class="mb-0 text-muted">
+                                ${new Date(
+                                    data.created_at
+                                ).toLocaleString()}
+                            </p>
+
+                        </div>
+
+
+                        <div class="col-md-6">
+
+                            <h6 class="fw-bold">
+                                Shipping Address
+                            </h6>
+
+                            <p class="text-muted">
+                                ${escapeHtml(
+                                    data.shipping_address
+                                )}<br>
+                                ${escapeHtml(
+                                    data.shipping_city
+                                )},
+                                ${escapeHtml(
+                                    data.shipping_state
+                                )}<br>
+                                ${escapeHtml(
+                                    data.shipping_postal_code
+                                )},
+                                ${escapeHtml(
+                                    data.shipping_country
+                                )}
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="card shadow-sm">
+
+                <div class="card-body">
+
+                    <h5 class="fw-bold mb-4">
+                        Order Items
+                    </h5>
+
+                    <div class="table-responsive">
+
+                        <table class="table">
+
+                            <thead>
+
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Quantity</th>
+                                    <th>Unit Price</th>
+                                    <th>Subtotal</th>
+                                </tr>
+
+                            </thead>
+
+                            <tbody>
+                                ${itemsHTML}
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+
+                    <div class="text-end">
+
+                        <h4 class="fw-bold">
+                            Total:
+                            <span class="text-primary">
+                                ₹${data.total_amount}
+                            </span>
+                        </h4>
+
+                    </div>
+
+                </div>
+
+            </div>
+        `;
+
+
+    } catch (error) {
+
+        container.innerHTML = `
+            <div class="alert alert-danger">
+                ${escapeHtml(error.message)}
+            </div>
+        `;
+    }
+}
+
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+        loadOrders();
+        loadOrderDetail();
+
+    }
+);
+
+
+async function logoutUser() {
+
+    const token =
+        localStorage.getItem("authToken");
+
+    if (!token) {
+        window.location.href = "/";
+        return;
+    }
+
+    try {
+
+        const response = await fetch(
+            "/api/accounts/logout/",
+            {
+                method: "POST",
+                headers: {
+                    "Authorization":
+                        "Token " + token
+                }
+            }
+        );
+
+        // Remove browser-side authentication data
+        localStorage.removeItem("authToken");
+        localStorage.removeItem("username");
+
+        if (response.ok || response.status === 401) {
+            window.location.href = "/";
+            return;
+        }
+
+        alert("Unable to logout. Please try again.");
+
+    } catch (error) {
+
+        // Even if the server is unavailable,
+        // clear the browser token.
+        localStorage.removeItem("authToken");
+        localStorage.removeItem("username");
+
+        window.location.href = "/";
+    }
+}
+
+
+function updateNavbar() {
+
+    const token =
+        localStorage.getItem("authToken");
+
+    const loginNavItem =
+        document.getElementById("loginNavItem");
+
+    const registerNavItem =
+        document.getElementById("registerNavItem");
+
+    const logoutNavItem =
+        document.getElementById("logoutNavItem");
+
+
+    if (!loginNavItem ||
+        !registerNavItem ||
+        !logoutNavItem) {
+        return;
+    }
+
+
+    if (token) {
+
+        loginNavItem.classList.add("d-none");
+        registerNavItem.classList.add("d-none");
+        logoutNavItem.classList.remove("d-none");
+
+    } else {
+
+        loginNavItem.classList.remove("d-none");
+        registerNavItem.classList.remove("d-none");
+        logoutNavItem.classList.add("d-none");
+    }
+}
+
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+        updateNavbar();
+    }
+);

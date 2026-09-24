@@ -1,37 +1,27 @@
 {% extends "base.html" %}
 
 {% block title %}
-Order Details | Online Shopping
+My Orders | Online Shopping
 {% endblock %}
 
 {% block content %}
 
 <div class="container py-5">
 
-    <div class="d-flex
-                justify-content-between
-                align-items-center
-                mb-4">
+    <div class="mb-4">
 
-        <div>
-
-            <h2 class="fw-bold">
-                Order Details
-            </h2>
-
-        </div>
-
-        <a
-            href="/orders/"
-            class="btn btn-outline-dark"
-        >
+        <h2 class="fw-bold">
             My Orders
-        </a>
+        </h2>
+
+        <p class="text-muted">
+            View your previous orders
+        </p>
 
     </div>
 
 
-    <div id="orderDetailContent">
+    <div id="ordersContent">
 
         <div class="text-center py-5">
 
@@ -49,10 +39,5 @@ Order Details | Online Shopping
     </div>
 
 </div>
-
-
-<script>
-    const orderId = {{ order_id }};
-</script>
 
 {% endblock %}
