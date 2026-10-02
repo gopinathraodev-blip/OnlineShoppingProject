@@ -116,3 +116,89 @@ class LoginSerializer(serializers.Serializer):
 
         attrs["user"] = user
         return attrs
+
+class CustomerProfileSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(
+        source="user.username",
+        read_only=True
+    )
+    email = serializers.EmailField(
+        source="user.email"
+    )
+    first_name = serializers.CharField(
+        source="user.first_name",
+        required=False,
+        allow_blank=True
+    )
+    last_name = serializers.CharField(
+        source="user.last_name",
+        required=False,
+        allow_blank=True
+    )
+
+    class Meta:
+        model = Customer
+        fields = [
+            "id",
+            "username",
+            "email",
+            "first_name",
+            "last_name",
+            "phone_number",
+            "address",
+            "city",
+            "state",
+            "postal_code",
+            "country",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = [
+            "id",
+            "username",
+            "created_at",
+            "updated_at",
+        ]
+
+    def validate_email(self, value):
+        user = self.instance.user
+
+        if User.objects.filter(
+            email=value
+        ).exclude(
+            id=user.id
+        ).exists():
+            raise serializers.ValidationError(
+                "Email already exists."
+            )
+
+        return value
+
+    def update(self, instance, validated_data):
+        user_data = validated_data.pop(
+            "user",
+            {}
+        )
+
+        user = instance.user
+
+        for field in [
+            "email",
+            "first_name",
+            "last_name",
+        ]:
+            if field in user_data:
+                setattr(
+                    user,
+                    field,
+                    user_data[field]
+                )
+
+        user.save()
+
+        instance = super().update(
+            instance,
+            validated_data
+        )
+
+        return instance

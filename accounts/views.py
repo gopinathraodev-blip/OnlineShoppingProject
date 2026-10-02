@@ -1,12 +1,11 @@
 from rest_framework import generics, status
 from rest_framework.authtoken.models import Token
-from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 from .models import Customer
-from .serializers import CustomerSerializer, LoginSerializer
+from .serializers import CustomerSerializer, LoginSerializer, CustomerProfileSerializer
 
 
 class CustomerRegistrationView(generics.CreateAPIView):
@@ -54,6 +53,16 @@ class LogoutView(generics.GenericAPIView):
             status=status.HTTP_200_OK
         )
 
+class ProfileView(generics.RetrieveUpdateAPIView):
+    serializer_class = CustomerProfileSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        return get_object_or_404(
+            Customer,
+            user=self.request.user
+        )
+
 
 def login_page(request):
     return render(request, "accounts/login.html")
@@ -61,3 +70,7 @@ def login_page(request):
 
 def register_page(request):
     return render(request, "accounts/register.html")
+
+
+def profile_page(request):
+    return render(request, "profile/profile.html")

@@ -1,0 +1,238 @@
+{% extends "base.html" %}
+
+{% block title %}
+My Account | Online Shopping
+{% endblock %}
+
+{% block content %}
+
+<div class="container py-5">
+
+    <div class="row justify-content-center">
+
+        <div class="col-lg-8">
+
+            <div class="card shadow-sm border-0">
+
+                <div class="card-body p-4">
+
+                    <h2 class="fw-bold mb-4">
+                        My Account
+                    </h2>
+
+                    <div
+                        id="profileMessage"
+                        class="alert d-none"
+                    ></div>
+
+                    <form id="profileForm">
+
+                        <div class="mb-3">
+                            <label class="form-label">
+                                Username
+                            </label>
+
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="profileUsername"
+                                readonly
+                            >
+                        </div>
+
+
+                        <div class="mb-3">
+
+                            <label
+                                for="profileEmail"
+                                class="form-label"
+                            >
+                                Email
+                            </label>
+
+                            <input
+                                type="email"
+                                class="form-control"
+                                id="profileEmail"
+                                required
+                            >
+
+                        </div>
+
+
+                        <div class="row">
+
+                            <div class="col-md-6 mb-3">
+
+                                <label
+                                    for="profileFirstName"
+                                    class="form-label"
+                                >
+                                    First Name
+                                </label>
+
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    id="profileFirstName"
+                                >
+
+                            </div>
+
+
+                            <div class="col-md-6 mb-3">
+
+                                <label
+                                    for="profileLastName"
+                                    class="form-label"
+                                >
+                                    Last Name
+                                </label>
+
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    id="profileLastName"
+                                >
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="mb-3">
+
+                            <label
+                                for="profilePhone"
+                                class="form-label"
+                            >
+                                Phone Number
+                            </label>
+
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="profilePhone"
+                            >
+
+                        </div>
+
+
+                        <div class="mb-3">
+
+                            <label
+                                for="profileAddress"
+                                class="form-label"
+                            >
+                                Address
+                            </label>
+
+                            <textarea
+                                class="form-control"
+                                id="profileAddress"
+                                rows="3"
+                            ></textarea>
+
+                        </div>
+
+
+                        <div class="row">
+
+                            <div class="col-md-6 mb-3">
+
+                                <label
+                                    for="profileCity"
+                                    class="form-label"
+                                >
+                                    City
+                                </label>
+
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    id="profileCity"
+                                >
+
+                            </div>
+
+
+                            <div class="col-md-6 mb-3">
+
+                                <label
+                                    for="profileState"
+                                    class="form-label"
+                                >
+                                    State
+                                </label>
+
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    id="profileState"
+                                >
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="row">
+
+                            <div class="col-md-6 mb-3">
+
+                                <label
+                                    for="profilePostalCode"
+                                    class="form-label"
+                                >
+                                    Postal Code
+                                </label>
+
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    id="profilePostalCode"
+                                >
+
+                            </div>
+
+
+                            <div class="col-md-6 mb-3">
+
+                                <label
+                                    for="profileCountry"
+                                    class="form-label"
+                                >
+                                    Country
+                                </label>
+
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    id="profileCountry"
+                                >
+
+                            </div>
+
+                        </div>
+
+
+                        <button
+                            type="submit"
+                            class="btn btn-primary"
+                        >
+                            Save Changes
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

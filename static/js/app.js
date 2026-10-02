@@ -1578,3 +1578,282 @@ document.addEventListener(
         updateNavbar();
     }
 );
+
+
+async function loadProfile() {
+
+    const form =
+        document.getElementById("profileForm");
+
+    if (!form) {
+        return;
+    }
+
+    const token =
+        localStorage.getItem("authToken");
+
+    if (!token) {
+
+        window.location.href =
+            "/api/accounts/login-page/";
+
+        return;
+    }
+
+
+    try {
+
+        const response = await fetch(
+            "/api/accounts/profile/",
+            {
+                method: "GET",
+                headers: {
+                    "Authorization":
+                        "Token " + token
+                }
+            }
+        );
+
+
+        const data =
+            await response.json();
+
+
+        if (response.status === 401) {
+
+            localStorage.removeItem(
+                "authToken"
+            );
+
+            localStorage.removeItem(
+                "username"
+            );
+
+            window.location.href =
+                "/api/accounts/login-page/";
+
+            return;
+        }
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.detail ||
+                "Unable to load profile."
+            );
+        }
+
+
+        document.getElementById(
+            "profileUsername"
+        ).value = data.username || "";
+
+        document.getElementById(
+            "profileEmail"
+        ).value = data.email || "";
+
+        document.getElementById(
+            "profileFirstName"
+        ).value = data.first_name || "";
+
+        document.getElementById(
+            "profileLastName"
+        ).value = data.last_name || "";
+
+        document.getElementById(
+            "profilePhone"
+        ).value = data.phone_number || "";
+
+        document.getElementById(
+            "profileAddress"
+        ).value = data.address || "";
+
+        document.getElementById(
+            "profileCity"
+        ).value = data.city || "";
+
+        document.getElementById(
+            "profileState"
+        ).value = data.state || "";
+
+        document.getElementById(
+            "profilePostalCode"
+        ).value = data.postal_code || "";
+
+        document.getElementById(
+            "profileCountry"
+        ).value = data.country || "";
+
+    } catch (error) {
+
+        const message =
+            document.getElementById(
+                "profileMessage"
+            );
+
+        message.className =
+            "alert alert-danger";
+
+        message.textContent =
+            error.message;
+    }
+}
+
+
+async function updateProfile(event) {
+
+    event.preventDefault();
+
+    const token =
+        localStorage.getItem("authToken");
+
+    const message =
+        document.getElementById(
+            "profileMessage"
+        );
+
+
+    const payload = {
+
+        email:
+            document.getElementById(
+                "profileEmail"
+            ).value,
+
+        first_name:
+            document.getElementById(
+                "profileFirstName"
+            ).value,
+
+        last_name:
+            document.getElementById(
+                "profileLastName"
+            ).value,
+
+        phone_number:
+            document.getElementById(
+                "profilePhone"
+            ).value,
+
+        address:
+            document.getElementById(
+                "profileAddress"
+            ).value,
+
+        city:
+            document.getElementById(
+                "profileCity"
+            ).value,
+
+        state:
+            document.getElementById(
+                "profileState"
+            ).value,
+
+        postal_code:
+            document.getElementById(
+                "profilePostalCode"
+            ).value,
+
+        country:
+            document.getElementById(
+                "profileCountry"
+            ).value
+    };
+
+
+    try {
+
+        const response = await fetch(
+            "/api/accounts/profile/",
+            {
+                method: "PATCH",
+
+                headers: {
+                    "Content-Type":
+                        "application/json",
+
+                    "Authorization":
+                        "Token " + token
+                },
+
+                body: JSON.stringify(payload)
+            }
+        );
+
+
+        const data =
+            await response.json();
+
+
+        if (response.status === 401) {
+
+            localStorage.removeItem(
+                "authToken"
+            );
+
+            localStorage.removeItem(
+                "username"
+            );
+
+            window.location.href =
+                "/api/accounts/login-page/";
+
+            return;
+        }
+
+
+        if (!response.ok) {
+
+            const errors =
+                Object.values(data).flat();
+
+            message.className =
+                "alert alert-danger";
+
+            message.textContent =
+                errors.join(" ");
+
+            return;
+        }
+
+
+        message.className =
+            "alert alert-success";
+
+        message.textContent =
+            "Profile updated successfully.";
+
+    } catch (error) {
+
+        message.className =
+            "alert alert-danger";
+
+        message.textContent =
+            "Unable to connect to the server.";
+    }
+}
+
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+        loadProfile();
+
+        const profileForm =
+            document.getElementById(
+                "profileForm"
+            );
+
+        if (profileForm) {
+
+            profileForm.addEventListener(
+                "submit",
+                updateProfile
+            );
+        }
+
+    }
+);

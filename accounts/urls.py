@@ -4,6 +4,7 @@ from .views import (
     CustomerRegistrationView,
     LoginView,
     LogoutView,
+    ProfileView,
     login_page,
     register_page,
 )
@@ -16,6 +17,7 @@ urlpatterns = [
         CustomerRegistrationView.as_view(),
         name="customer-register",
     ),
+
     path(
         "login/",
         LoginView.as_view(),
@@ -28,12 +30,19 @@ urlpatterns = [
     name="logout",
     ),
 
+    path(
+    "profile/",
+    ProfileView.as_view(),
+    name="profile",
+    ),
+
     # HTML pages
     path(
         "login-page/",
         login_page,
         name="login-page",
     ),
+
     path(
         "register-page/",
         register_page,
