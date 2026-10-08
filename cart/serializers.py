@@ -8,12 +8,19 @@ class CartItemSerializer(serializers.ModelSerializer):
         source="product.name",
         read_only=True
     )
+
     unit_price = serializers.DecimalField(
         source="product.price",
         max_digits=10,
         decimal_places=2,
         read_only=True
     )
+
+    product_image = serializers.ImageField(
+        source="product.image",
+        read_only=True
+    )
+
     subtotal = serializers.SerializerMethodField()
 
     class Meta:
@@ -22,15 +29,18 @@ class CartItemSerializer(serializers.ModelSerializer):
             "id",
             "product",
             "product_name",
+            "product_image",
             "quantity",
             "unit_price",
             "subtotal",
             "created_at",
             "updated_at",
         ]
+
         read_only_fields = [
             "id",
             "product_name",
+            "product_image",
             "unit_price",
             "subtotal",
             "created_at",
@@ -42,7 +52,11 @@ class CartItemSerializer(serializers.ModelSerializer):
 
 
 class CartSerializer(serializers.ModelSerializer):
-    items = CartItemSerializer(many=True, read_only=True)
+    items = CartItemSerializer(
+        many=True,
+        read_only=True
+    )
+
     total_amount = serializers.SerializerMethodField()
 
     class Meta:
@@ -55,6 +69,7 @@ class CartSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
         ]
+
         read_only_fields = [
             "id",
             "customer",

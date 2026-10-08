@@ -449,8 +449,7 @@ function displayCart(cart) {
 
     cart.items.forEach(function (item) {
 
-        const imageUrl =
-            "/static/images/product-placeholder.jpg";
+        const imageUrl = item.product_image || "/static/images/product-placeholder.jpg";
 
 
         itemsHTML += `
