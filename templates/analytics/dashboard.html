@@ -1,0 +1,276 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block title %}Analytics Dashboard{% endblock %}
+
+{% block content %}
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body">
+        <h5 class="fw-bold mb-3">Filter Sales by Date</h5>
+
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label for="start_date" class="form-label">
+                    Start Date
+                </label>
+                <input
+                    type="date"
+                    id="start_date"
+                    name="start_date"
+                    class="form-control"
+                    value="{{ selected_start_date }}"
+                >
+            </div>
+
+            <div class="col-md-4">
+                <label for="end_date" class="form-label">
+                    End Date
+                </label>
+                <input
+                    type="date"
+                    id="end_date"
+                    name="end_date"
+                    class="form-control"
+                    value="{{ selected_end_date }}"
+                >
+            </div>
+
+            <div class="col-md-4">
+                <button type="submit" class="btn btn-primary me-2">
+                    Apply Filter
+                </button>
+                <a href="{% url 'analytics-dashboard' %}"
+                   class="btn btn-outline-secondary">
+                    Clear
+                </a>         
+                <a href="{% url 'analytics-export-csv' %}?start_date={{ selected_start_date }}&end_date={{ selected_end_date }}"
+                class="btn btn-success">
+                    Export CSV
+                </a>
+            </div>
+        </form>
+
+        {% if invalid_date_range %}
+            <div class="alert alert-warning mt-3 mb-0">
+                Start Date must not be later than End Date.
+                Please select a valid date range.
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="fw-bold">Analytics Dashboard</h1>
+            <p class="text-muted mb-0">
+                Sales, orders, products and inventory overview
+            </p>
+        </div>
+        <span class="badge text-bg-dark">Admin</span>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-6 col-xl-3">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <p class="text-muted mb-2">Total Revenue</p>
+                    <h3 class="fw-bold">
+                        ₹{{ total_revenue|floatformat:2|intcomma }}
+                    </h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-xl-3">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <p class="text-muted mb-2">Total Orders</p>
+                    <h3 class="fw-bold">{{ total_orders }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-xl-3">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <p class="text-muted mb-2">Customers</p>
+                    <h3 class="fw-bold">{{ total_customers }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-xl-3">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <p class="text-muted mb-2">Active Products</p>
+                    <h3 class="fw-bold">{{ total_products }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+            <h5 class="fw-bold mb-3">Monthly Sales Revenue</h5>
+            <canvas id="salesChart" height="100"></canvas>
+        </div>
+    </div>
+
+    
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+            <h5 class="fw-bold mb-3">Orders by Status</h5>
+            <div style="max-width: 520px; margin: auto;">
+                <canvas id="orderStatusChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <h5 class="fw-bold mb-3">Best-Selling Products</h5>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Units Sold</th>
+                                    <th>Revenue</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for product in best_selling_products %}
+                                <tr>
+                                    <td>{{ product.product__name }}</td>
+                                    <td>{{ product.units_sold }}</td>
+                                    <td>₹{{ product.revenue|floatformat:2 }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="3" class="text-muted">
+                                        No sales data available yet.
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <h5 class="fw-bold mb-3">Low-Stock Products</h5>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Stock Remaining</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for product in low_stock_products %}
+                                <tr>
+                                    <td>{{ product.name }}</td>
+                                    <td>
+                                        <span class="badge text-bg-warning">
+                                            {{ product.stock_quantity }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="2" class="text-muted">
+                                        No low-stock products found.
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+{{ sales_labels|json_script:"sales-labels" }}
+{{ sales_revenue|json_script:"sales-revenue" }}
+
+<script>
+    const salesLabels = JSON.parse(
+        document.getElementById("sales-labels").textContent
+    );
+
+    const salesRevenue = JSON.parse(
+        document.getElementById("sales-revenue").textContent
+    );
+
+    new Chart(document.getElementById("salesChart"), {
+        type: "line",
+        data: {
+            labels: salesLabels,
+            datasets: [{
+                label: "Revenue (₹)",
+                data: salesRevenue,
+                borderWidth: 3,
+                tension: 0.3,
+                fill: false
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
+
+{{ order_status_labels|json_script:"order-status-labels" }}
+{{ order_status_counts|json_script:"order-status-counts" }}
+
+<script>
+    const statusLabels = JSON.parse(
+        document.getElementById("order-status-labels").textContent
+    );
+
+    const statusCounts = JSON.parse(
+        document.getElementById("order-status-counts").textContent
+    );
+
+    new Chart(document.getElementById("orderStatusChart"), {
+        type: "doughnut",
+        data: {
+            labels: statusLabels,
+            datasets: [{
+                label: "Number of Orders",
+                data: statusCounts
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: "bottom"
+                }
+            }
+        }
+    });
+</script>
+
+{% endblock %}
