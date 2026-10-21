@@ -94,6 +94,49 @@ def dashboard(request):
     )
 
     
+    # Detailed product performance report
+    product_performance = (
+        OrderItem.objects
+        .filter(order__in=valid_orders)
+        .values(
+            "product__id",
+            "product__name",
+            "product__sku",
+            "product__price",
+        )
+        .annotate(
+            units_sold=Sum("quantity"),
+            revenue=Sum("subtotal"),
+        )
+        .order_by("-revenue")
+    )
+
+    # Calculate average selling price for each product
+    product_performance_data = []
+
+    for item in product_performance:
+        units_sold = item["units_sold"] or 0
+        revenue = item["revenue"] or 0
+
+        average_selling_price = (
+            float(revenue) / units_sold
+            if units_sold > 0
+            else 0
+        )
+
+        product_performance_data.append({
+            "product_id": item["product__id"],
+            "product_name": item["product__name"],
+            "sku": item["product__sku"],
+            "current_price": float(item["product__price"]),
+            "units_sold": units_sold,
+            "revenue": float(revenue),
+            "average_selling_price": round(
+                average_selling_price, 2
+            ),
+        })
+
+    
     # Product performance grouped by category
     category_performance = (
         OrderItem.objects
@@ -131,6 +174,8 @@ def dashboard(request):
         for item in order_statuses
     ]
 
+    category_performance_data = list(category_performance)
+
     context = {
         "total_revenue": total_revenue,
         "total_orders": total_orders,
@@ -145,6 +190,8 @@ def dashboard(request):
         "order_status_labels": order_status_labels,
         "order_status_counts": order_status_counts,
         "category_performance": category_performance,
+        "category_performance_data": category_performance_data,
+        "product_performance": product_performance_data,
         "selected_start_date": (
             start_date.isoformat() if start_date and valid_dates else ""
         ),

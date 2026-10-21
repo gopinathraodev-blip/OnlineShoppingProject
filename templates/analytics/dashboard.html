@@ -14,48 +14,36 @@
                 <label for="start_date" class="form-label">
                     Start Date
                 </label>
-                <input
-                    type="date"
-                    id="start_date"
-                    name="start_date"
-                    class="form-control"
-                    value="{{ selected_start_date }}"
-                >
+                <input type="date" id="start_date" name="start_date" class="form-control"
+                    value="{{ selected_start_date }}">
             </div>
 
             <div class="col-md-4">
                 <label for="end_date" class="form-label">
                     End Date
                 </label>
-                <input
-                    type="date"
-                    id="end_date"
-                    name="end_date"
-                    class="form-control"
-                    value="{{ selected_end_date }}"
-                >
+                <input type="date" id="end_date" name="end_date" class="form-control" value="{{ selected_end_date }}">
             </div>
 
             <div class="col-md-4">
                 <button type="submit" class="btn btn-primary me-2">
                     Apply Filter
                 </button>
-                <a href="{% url 'analytics-dashboard' %}"
-                   class="btn btn-outline-secondary">
+                <a href="{% url 'analytics-dashboard' %}" class="btn btn-outline-secondary">
                     Clear
-                </a>         
+                </a>
                 <a href="{% url 'analytics-export-csv' %}?start_date={{ selected_start_date }}&end_date={{ selected_end_date }}"
-                class="btn btn-success">
+                    class="btn btn-success">
                     Export CSV
                 </a>
             </div>
         </form>
 
         {% if invalid_date_range %}
-            <div class="alert alert-warning mt-3 mb-0">
-                Start Date must not be later than End Date.
-                Please select a valid date range.
-            </div>
+        <div class="alert alert-warning mt-3 mb-0">
+            Start Date must not be later than End Date.
+            Please select a valid date range.
+        </div>
         {% endif %}
     </div>
 </div>
@@ -118,12 +106,62 @@
         </div>
     </div>
 
-    
+
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+            <h5 class="fw-bold mb-3">Revenue by Category</h5>
+            <div style="max-width: 650px; margin: auto;">
+                <canvas id="categoryRevenueChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+
     <div class="card shadow-sm border-0 mb-4">
         <div class="card-body">
             <h5 class="fw-bold mb-3">Orders by Status</h5>
             <div style="max-width: 520px; margin: auto;">
                 <canvas id="orderStatusChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+            <h5 class="fw-bold mb-3">Category Performance</h5>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Category</th>
+                            <th class="text-end">Units Sold</th>
+                            <th class="text-end">Revenue</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for category in category_performance %}
+                        <tr>
+                            <td>
+                                {{ category.product__category__name|default:"Uncategorized" }}
+                            </td>
+                            <td class="text-end">
+                                {{ category.units_sold|default:0 }}
+                            </td>
+                            <td class="text-end">
+                                ₹{{ category.revenue|floatformat:2 }}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3" class="text-center text-muted">
+                                No sales data is available for this period.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -267,6 +305,48 @@
             plugins: {
                 legend: {
                     position: "bottom"
+                }
+            }
+        }
+    });
+</script>
+
+
+{{ category_performance_data|json_script:"category-performance-data" }}
+
+<script>
+    const categoryData = JSON.parse(
+        document.getElementById("category-performance-data").textContent
+    );
+
+    const categoryLabels = categoryData.map(
+        item => item["product__category__name"] || "Uncategorized"
+    );
+
+    const categoryRevenue = categoryData.map(
+        item => Number(item.revenue || 0)
+    );
+
+    new Chart(document.getElementById("categoryRevenueChart"), {
+        type: "bar",
+        data: {
+            labels: categoryLabels,
+            datasets: [{
+                label: "Revenue (₹)",
+                data: categoryRevenue
+            }]
+        },
+        options: {
+            responsive: true,
+            indexAxis: "y",
+            scales: {
+                x: {
+                    beginAtZero: true
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
                 }
             }
         }
